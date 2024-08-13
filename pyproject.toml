@@ -12,6 +12,7 @@ packages = [
 python = "^3.12"
 fastapi = {extras = ["standard"], version = "^0.112.0"}
 python-multipart = "^0.0.9"
+pillow = "^10.4.0"
 
 
 [build-system]
