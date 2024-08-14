@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
-from selenium import webdriver
-
 from api.interfaces import ListingRequest, ListingResult
+from selenium import webdriver
 
 
 class Integration(ABC):
@@ -17,7 +16,7 @@ class Integration(ABC):
         options = webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
         options.add_argument("user-data-dir=selenium")
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
 
         driver = webdriver.Chrome(options=options)
 

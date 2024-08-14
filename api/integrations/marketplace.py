@@ -93,7 +93,8 @@ class MarketplaceIntegration(Integration):
             driver.find_element(By.XPATH, '//div[@aria-label="Publish"]').click()
 
             logger.debug("Waiting for listing to be published")
-            wait.until(
+            longWait = WebDriverWait(driver, 30)
+            longWait.until(
                 lambda d: d.current_url
                 == "https://www.facebook.com/marketplace/you/selling"
             )
@@ -120,16 +121,3 @@ class MarketplaceIntegration(Integration):
         except Exception as e:
             logger.debug("Failed to list on Marketplace: %s", exc_info=e)
             return ListingResult(url="", success=False)
-
-
-# MarketplaceIntegration().list(
-#     ListingRequest(
-#         title="Test",
-#         description="Test",
-#         size="Test",
-#         price="123",
-#         tags="Test",
-#         condition=Condition("New"),
-#         images=[],
-#     )
-# )
