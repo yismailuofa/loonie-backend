@@ -25,10 +25,6 @@ class MarketplaceIntegration(Integration):
             if not driver.find_elements(By.NAME, "email"):
                 logger.debug("Already logged in to Facebook")
             else:
-                logger.debug("Waiting for Facebook login")
-                wait.until(lambda d: d.find_element(By.NAME, "email"))
-                wait.until(lambda d: d.find_element(By.NAME, "pass"))
-
                 if not (user := os.getenv("MARKETPLACE_USERNAME")) or not (
                     password := os.getenv("MARKETPLACE_PASSWORD")
                 ):
@@ -36,9 +32,10 @@ class MarketplaceIntegration(Integration):
                     raise Exception("Missing Facebook credentials")
 
                 logger.debug("Logging in to Facebook")
-                driver.find_element(By.NAME, "email").send_keys(user)
-                driver.find_element(By.NAME, "pass").send_keys(password)
-                driver.find_element(By.NAME, "pass").send_keys(Keys.RETURN)
+                wait.until(lambda d: d.find_element(By.NAME, "email")).send_keys(user)
+                wait.until(lambda d: d.find_element(By.NAME, "pass")).send_keys(
+                    password, Keys.RETURN
+                )
 
             logger.debug("Navigating to create listing page")
             driver.get("https://www.facebook.com/marketplace/create/item")
@@ -114,6 +111,16 @@ class MarketplaceIntegration(Integration):
                 driver.find_element(
                     By.XPATH, '//label[@aria-label="Product tags"]//textarea'
                 ).send_keys(joinedTags)
+
+            wait.until(
+                lambda d: d.find_element(By.XPATH, f"//span[text()='Public meetup']")
+            ).click()
+            wait.until(
+                lambda d: d.find_element(By.XPATH, f"//span[text()='Door pickup']")
+            ).click()
+            wait.until(
+                lambda d: d.find_element(By.XPATH, f"//span[text()='Door dropoff']")
+            ).click()
 
             logger.debug("Publishing listing")
             driver.find_element(By.XPATH, '//div[@aria-label="Next"]').click()

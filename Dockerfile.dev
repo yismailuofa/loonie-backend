@@ -14,5 +14,7 @@ COPY --from=req-stage /tmp/requirements.txt /api/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
 COPY ./api ./api
 
+ENV IN_DOCKER_CONTAINER=true
+
 #
 CMD ["fastapi", "run", "api/main.py", "--port", "80"]

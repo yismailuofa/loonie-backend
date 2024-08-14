@@ -3,9 +3,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, Form, UploadFile
 
-from api.integrations.kijiji import KijijiIntegration
 from api.integrations.marketplace import MarketplaceIntegration
-from api.interfaces import Condition, ListingRequest, ListingResults
+from api.interfaces import Condition, ListingRequest, ListingResult, ListingResults
 
 router = APIRouter()
 
@@ -45,7 +44,11 @@ async def createListing(
     )
 
     try:
-        k = KijijiIntegration().list(lr)
+        # k = KijijiIntegration().list(lr)
+        k = ListingResult(
+            url="https://www.kijiji.ca/p-select-category.html", success=True
+        )
+        m = ListingResult(url="https://www.facebook.com/marketplace", success=True)
         m = MarketplaceIntegration().list(lr)
 
         return ListingResults(

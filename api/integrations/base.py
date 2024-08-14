@@ -1,7 +1,12 @@
+import os
 from abc import ABC, abstractmethod
+
+from dotenv import load_dotenv
 
 from api.interfaces import ListingRequest, ListingResult
 from selenium import webdriver
+
+load_dotenv()
 
 
 class Integration(ABC):
@@ -17,12 +22,13 @@ class Integration(ABC):
         options.add_argument("--disable-notifications")
         options.add_argument("--window-size=1920,1080")
 
-        # options.add_argument("--user-data-dir=selenium")
-        # driver = webdriver.Chrome(options=options)
-
-        options.add_argument("--user-data-dir=/home/seluser/selenium")
-        driver = webdriver.Remote(
-            options=options, command_executor="http://selenium:4444/wd/hub"
-        )
+        if os.getenv("IN_DOCKER_CONTAINER", False):
+            options.add_argument("--user-data-dir=/home/seluser/selenium")
+            driver = webdriver.Remote(
+                options=options, command_executor="http://selenium:4444/wd/hub"
+            )
+        else:
+            options.add_argument("--user-data-dir=selenium")
+            driver = webdriver.Chrome(options=options)
 
         return driver
