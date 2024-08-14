@@ -1,11 +1,16 @@
 version: '3'
 services:
-  chrome:
-    image: selenium/standalone-chrome:latest
+  selenium:
+    image: selenium/standalone-chromium:latest
     ports:
       - 4444:4444
+      - 7900:7900
     restart: always
     shm_size: 2gb
+    privileged: true
+
+  # # Only for local since we use mac
+  #   platform: linux/x86_64
 
   api:
     build:
@@ -17,5 +22,5 @@ services:
       - .env
     restart: always
     depends_on:
-      - chrome
+      - selenium
 

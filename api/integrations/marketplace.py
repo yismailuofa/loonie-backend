@@ -1,6 +1,7 @@
 import os
 
 from dotenv import load_dotenv
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -15,8 +16,8 @@ from api.logger import logger
 
 class MarketplaceIntegration(Integration):
     def list(self, request) -> ListingResult:
+        driver = self.getDriver()
         try:
-            driver = self.getDriver()
             wait = WebDriverWait(driver, self.DEFAULT_TIMEOUT)
 
             driver.get("https://www.facebook.com/marketplace")
@@ -41,6 +42,22 @@ class MarketplaceIntegration(Integration):
 
             logger.debug("Navigating to create listing page")
             driver.get("https://www.facebook.com/marketplace/create/item")
+
+            # sometimes it doesn't redirect to the create listing page so we try again
+            while (
+                not driver.current_url
+                == "https://www.facebook.com/marketplace/create/item"
+            ):
+                driver.get("https://www.facebook.com/marketplace/create/item")
+                logger.debug("Retrying to navigate to create listing page")
+                try:
+                    wait.until(
+                        lambda d: d.current_url
+                        == "https://www.facebook.com/marketplace/create/item"
+                    )
+                except:
+                    pass
+
             wait.until(
                 lambda d: d.find_element(By.XPATH, '//label[@aria-label="Title"]')
             )
@@ -61,14 +78,27 @@ class MarketplaceIntegration(Integration):
                 By.XPATH, '//label[@aria-label="Price"]/input'
             ).send_keys(request.price)
 
-            driver.find_element(By.XPATH, '//label[@aria-label="Category"]').click()
-            driver.find_element(
-                By.XPATH, '//span[text()="Men\'s clothing & shoes"]'
-            ).click()
+            ActionChains(driver).move_to_element(
+                driver.find_element(By.XPATH, '//label[@aria-label="Category"]')
+            ).click().perform()
 
-            driver.find_element(By.XPATH, '//label[@aria-label="Condition"]').click()
-            driver.find_element(
-                By.XPATH, f'//span[text()="{str(request.condition)}"]'
+            ActionChains(driver).move_to_element(
+                wait.until(
+                    lambda d: d.find_element(
+                        By.XPATH, '//span[text()="Men\'s clothing & shoes"]'
+                    )
+                )
+            ).click().perform()
+
+            ActionChains(driver).move_to_element(
+                driver.find_element(By.XPATH, '//label[@aria-label="Condition"]')
+            ).click().perform()
+
+            wait.until(
+                lambda d: d.find_element(
+                    By.XPATH,
+                    f'//div[div/div/div/span[text()="{str(request.condition)}"]]',
+                )
             ).click()
 
             driver.find_element(
@@ -77,9 +107,6 @@ class MarketplaceIntegration(Integration):
 
             wait.until(
                 lambda d: d.find_element(By.XPATH, '//label[@aria-label="Size"]/input')
-            )
-            driver.find_element(
-                By.XPATH, '//label[@aria-label="Size"]/input'
             ).send_keys(request.size)
 
             if request.tags:
@@ -90,7 +117,9 @@ class MarketplaceIntegration(Integration):
 
             logger.debug("Publishing listing")
             driver.find_element(By.XPATH, '//div[@aria-label="Next"]').click()
-            driver.find_element(By.XPATH, '//div[@aria-label="Publish"]').click()
+            wait.until(
+                lambda d: d.find_element(By.XPATH, '//div[@aria-label="Publish"]')
+            ).click()
 
             logger.debug("Waiting for listing to be published")
             longWait = WebDriverWait(driver, 30)
@@ -101,16 +130,12 @@ class MarketplaceIntegration(Integration):
 
             wait.until(
                 lambda d: d.find_element(By.XPATH, f"//span[text()='{request.title}']")
-            )
-            driver.find_element(By.XPATH, f"//span[text()='{request.title}']").click()
+            ).click()
 
-            wait.until(
+            url = wait.until(
                 lambda d: d.find_element(
                     By.XPATH, '//div[@aria-label="Your Listing"]//a'
                 )
-            )
-            url = driver.find_element(
-                By.XPATH, '//div[@aria-label="Your Listing"]//a'
             ).get_attribute("href")
 
             if not url:
@@ -119,5 +144,7 @@ class MarketplaceIntegration(Integration):
 
             return ListingResult(url=url, success=True)
         except Exception as e:
-            logger.debug("Failed to list on Marketplace: %s", exc_info=e)
+            logger.debug("Failed to list on Marketplace: ", exc_info=e)
             return ListingResult(url="", success=False)
+        finally:
+            driver.quit()
