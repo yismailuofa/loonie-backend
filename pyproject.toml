@@ -4,15 +4,14 @@ version = "0.1.0"
 description = ""
 authors = ["Youssef Ismail <yismail@ualberta.ca>"]
 readme = "README.md"
-packages = [
-    { include = "api"}
-]
+packages = [{ include = "api"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = {extras = ["standard"], version = "^0.112.0"}
 python-multipart = "^0.0.9"
 pillow = "^10.4.0"
+selenium = "^4.23.1"
 
 
 [build-system]

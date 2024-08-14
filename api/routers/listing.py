@@ -1,8 +1,11 @@
+import os
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, UploadFile
 
-from api.interfaces import Condition, ListingResult, ListingResults
+from api.integrations.kijiji import KijijiIntegration
+from api.integrations.marketplace import MarketplaceIntegration
+from api.interfaces import Condition, ListingRequest, ListingResults
 
 router = APIRouter()
 
@@ -17,20 +20,40 @@ async def createListing(
     tags: Annotated[str, Form()],
     images: Annotated[list[UploadFile], File()],
 ) -> ListingResults:
-    print(
-        {
-            "message": "Listing created successfully",
-            "title": title,
-            "description": description,
-            "size": size,
-            "price": price,
-            "condition": condition,
-            "tags": tags,
-            "images": [image.filename for image in images],
-        }
+
+    if not os.path.exists("temp"):
+        os.makedirs("temp")
+    imagePaths = []
+
+    for image in images:
+        if not image.size:
+            continue
+
+        with open(f"temp/{image.filename}", "wb") as f:
+            f.write(image.file.read())
+
+        imagePaths.append(os.path.abspath(f"temp/{image.filename}"))
+
+    lr = ListingRequest(
+        title=title,
+        description=description,
+        size=size,
+        price=price,
+        condition=condition,
+        tags=tags,
+        images=imagePaths,
     )
 
-    return ListingResults(
-        kijiji=ListingResult(url="https://www.kijiji.ca", success=True),
-        marketplace=ListingResult(url="https://www.marketplace.com", success=True),
-    )
+    try:
+        k = KijijiIntegration().list(lr)
+        m = MarketplaceIntegration().list(lr)
+
+        return ListingResults(
+            kijiji=k,
+            marketplace=m,
+        )
+
+    finally:
+        # remove temp images
+        for image in imagePaths:
+            os.remove(image)

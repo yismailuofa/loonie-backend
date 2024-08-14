@@ -9,6 +9,9 @@ class Condition(str, Enum):
     UsedGood = "Used - Good"
     UsedFair = "Used - Fair"
 
+    def __str__(self):
+        return self.value
+
 
 class ListingResult(BaseModel):
     url: str
@@ -18,3 +21,13 @@ class ListingResult(BaseModel):
 class ListingResults(BaseModel):
     kijiji: ListingResult
     marketplace: ListingResult
+
+
+class ListingRequest(BaseModel):
+    title: str
+    description: str
+    size: str
+    price: str
+    condition: Condition
+    tags: str
+    images: list[str]

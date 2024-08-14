@@ -5,6 +5,7 @@ from api.routers import router
 
 app = FastAPI(title="Loonie API", swagger_ui_parameters={"persistAuthorization": True})
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
