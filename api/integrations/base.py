@@ -22,8 +22,8 @@ class Integration(ABC):
         options.add_argument("--disable-notifications")
         options.add_argument("--no-sandbox")
         options.add_argument("--remote-debugging-port=9222")
-        # options.add_argument("--headless")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-extensions")
         options.add_argument("--window-size=1920,1080")
 
         if os.getenv("IN_DOCKER_CONTAINER", False):
@@ -32,7 +32,6 @@ class Integration(ABC):
                 options=options, command_executor="http://selenium:4444/wd/hub"
             )
         else:
-            # service = Service(ChromeDriverManager().install())
             options.add_argument("--user-data-dir=selenium")
             driver = webdriver.Chrome(options=options)
 
