@@ -144,7 +144,8 @@ class KijijiIntegration(Integration):
                 lambda d: d.find_element(By.XPATH, '//button[text()="Post Your Ad"]')
             ).click()
 
-            wait.until(lambda d: "adId=" in d.current_url)
+            longWait = WebDriverWait(driver, 60)
+            longWait.until(EC.title_contains(request.title))
 
             url = driver.current_url
 
