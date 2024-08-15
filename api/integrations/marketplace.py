@@ -143,7 +143,8 @@ class MarketplaceIntegration(Integration):
 
             wait.until(
                 lambda d: d.find_element(By.XPATH, f"//span[text()='{request.title}']")
-            ).click()
+            )
+            driver.find_element(By.XPATH, f"//span[text()='{request.title}']").click()
 
             url = wait.until(
                 lambda d: d.find_element(
