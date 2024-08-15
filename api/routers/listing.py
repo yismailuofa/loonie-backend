@@ -2,9 +2,14 @@ import os
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, UploadFile
+from PIL import Image
+from pillow_heif import register_heif_opener
 
+from api.integrations.kijiji import KijijiIntegration
 from api.integrations.marketplace import MarketplaceIntegration
-from api.interfaces import Condition, ListingRequest, ListingResult, ListingResults
+from api.interfaces import Condition, ListingRequest, ListingResults
+
+register_heif_opener()
 
 router = APIRouter()
 
@@ -29,7 +34,9 @@ async def createListing(
             continue
 
         with open(f"temp/{image.filename}", "wb") as f:
-            f.write(image.file.read())
+            img = Image.open(image.file)
+            img = img.convert("RGB")
+            img.save(f"temp/{image.filename}", "JPEG")
 
         imagePaths.append(os.path.abspath(f"temp/{image.filename}"))
 
@@ -44,11 +51,7 @@ async def createListing(
     )
 
     try:
-        # k = KijijiIntegration().list(lr)
-        k = ListingResult(
-            url="https://www.kijiji.ca/p-select-category.html", success=True
-        )
-        m = ListingResult(url="https://www.facebook.com/marketplace", success=True)
+        k = KijijiIntegration().list(lr)
         m = MarketplaceIntegration().list(lr)
 
         return ListingResults(

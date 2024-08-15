@@ -107,7 +107,7 @@ class MarketplaceIntegration(Integration):
             ).send_keys(request.size)
 
             if request.tags:
-                joinedTags = ", ".join(request.tags.split("\n")) + ","
+                joinedTags = ",".join(request.tags.split("\n")) + ","
                 driver.find_element(
                     By.XPATH, '//label[@aria-label="Product tags"]//textarea'
                 ).send_keys(joinedTags)

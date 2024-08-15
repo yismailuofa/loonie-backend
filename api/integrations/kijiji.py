@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from api.integrations.base import Integration
 from api.interfaces import ListingResult
@@ -65,15 +65,98 @@ class KijijiIntegration(Integration):
                 )
             )
 
+            wait.until(lambda d: d.find_element(By.ID, "OFFER1"))
+
+            logger.debug("Adding rest of form")
+
+            if request.images:
+                imageInput = driver.find_element(
+                    By.XPATH,
+                    "//input[@accept='image/jpeg,.jpg,.jpeg,image/png,.png,image/gif,.gif,image/bmp,.bmp']",
+                )
+                joinedPaths = "\n".join(request.images)
+                imageInput.send_keys(joinedPaths)
+
+                # wait for images to upload
+                wait.until(
+                    lambda d: len(
+                        d.find_elements(
+                            By.XPATH,
+                            '//ol[@id="MediaUploadedImages"]/li[contains(@class, "thumbnail")]',
+                        )
+                    )
+                    == len(request.images)
+                )
+
             wait.until(
-                lambda d: d.find_element(By.XPATH, '//label[text()="Men\'s Shoes"]')
+                lambda d: d.find_element(
+                    By.XPATH, '//label[text()="Willing to drop-off / deliver"]'
+                )
+            ).click()
+            wait.until(
+                lambda d: d.find_element(
+                    By.XPATH, '//label[text()="Willing to ship the item"]'
+                )
+            ).click()
+            wait.until(
+                lambda d: d.find_element(
+                    By.XPATH, '//label[text()="Offer curbside pick up"]'
+                )
             ).click()
 
-            wait.u
+            wait.until(
+                lambda d: d.find_element(
+                    By.XPATH, '//label[text()="Offer cashless payment"]'
+                )
+            ).click()
+            wait.until(
+                lambda d: d.find_element(By.XPATH, '//label[text()="Cash accepted"]')
+            ).click()
 
-            return ListingResult(
-                url="https://www.kijiji.ca/p-select-category.html", success=True
+            conditionSelect = Select(
+                wait.until(lambda d: d.find_element(By.ID, "condition_s"))
             )
+            index = list(map(lambda x: x.text.lower(), conditionSelect.options)).index(
+                request.condition.value.lower()
+            )
+            conditionSelect.select_by_index(index)
+
+            sizeSelect = Select(wait.until(lambda d: d.find_element(By.ID, "size_s")))
+            if not request.size.replace(".", "").isdigit():
+                request.size = "Other"
+            index = list(map(lambda x: x.text, sizeSelect.options)).index(request.size)
+            sizeSelect.select_by_index(index)
+
+            wait.until(lambda d: d.find_element(By.ID, "pstad-descrptn")).send_keys(
+                request.description
+            )
+
+            if request.tags:
+                joinedTags = ",".join(request.tags.split("\n")) + ","
+                driver.find_element(By.ID, "pstad-tagsInput").send_keys(joinedTags)
+
+            wait.until(lambda d: d.find_element(By.ID, "PriceAmount")).send_keys(
+                request.price
+            )
+
+            logger.debug("Posting ad")
+            wait.until(
+                lambda d: d.find_element(By.XPATH, '//button[text()="Post Your Ad"]')
+            ).click()
+
+            wait.until(
+                lambda d: d.current_url.startswith(
+                    "https://www.kijiji.ca/v-view-details.html"
+                )
+            )
+
+            url = driver.current_url
+
+            if not url:
+                logger.debug("Failed to get listing URL")
+                raise Exception("Failed to get listing URL")
+
+            return ListingResult(url=url, success=True)
 
         except Exception as e:
             logger.debug("Failed to list on Kijiji: ", exc_info=e)
