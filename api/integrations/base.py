@@ -20,6 +20,7 @@ class Integration(ABC):
     def getDriver(self) -> webdriver.Chrome | webdriver.Remote:
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-notifications")
+        options.add_argument("--no-sandbox")
         # options.add_argument("--headless")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
