@@ -2,8 +2,6 @@ import os
 from abc import ABC, abstractmethod
 
 from dotenv import load_dotenv
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 
 from api.interfaces import ListingRequest, ListingResult
 from selenium import webdriver
@@ -32,8 +30,8 @@ class Integration(ABC):
                 options=options, command_executor="http://selenium:4444/wd/hub"
             )
         else:
-            service = Service(ChromeDriverManager().install())
+            # service = Service(ChromeDriverManager().install())
             options.add_argument("--user-data-dir=selenium")
-            driver = webdriver.Chrome(options=options, service=service)
+            driver = webdriver.Chrome(options=options)
 
         return driver
