@@ -19,6 +19,7 @@ class MarketplaceIntegration(Integration):
         driver = self.getDriver()
         try:
             wait = WebDriverWait(driver, self.DEFAULT_TIMEOUT)
+            longWait = WebDriverWait(driver, 60)
 
             driver.get("https://www.facebook.com/marketplace")
 
@@ -35,6 +36,12 @@ class MarketplaceIntegration(Integration):
                 wait.until(lambda d: d.find_element(By.NAME, "email")).send_keys(user)
                 wait.until(lambda d: d.find_element(By.NAME, "pass")).send_keys(
                     password, Keys.RETURN
+                )
+
+                longWait.until(
+                    lambda d: d.find_element(
+                        By.XPATH, '//span[text()="Create new listing"]'
+                    )
                 )
 
             logger.debug("Navigating to create listing page")
@@ -129,7 +136,6 @@ class MarketplaceIntegration(Integration):
             ).click()
 
             logger.debug("Waiting for listing to be published")
-            longWait = WebDriverWait(driver, 30)
             longWait.until(
                 lambda d: d.current_url
                 == "https://www.facebook.com/marketplace/you/selling"

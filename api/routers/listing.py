@@ -51,8 +51,8 @@ async def createListing(
     )
 
     try:
-        k = KijijiIntegration().list(lr)
         m = MarketplaceIntegration().list(lr)
+        k = KijijiIntegration().list(lr)
 
         return ListingResults(
             kijiji=k,
