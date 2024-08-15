@@ -23,6 +23,7 @@ class Integration(ABC):
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-notifications")
         # options.add_argument("--headless")
+        options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920,1080")
 
         if os.getenv("IN_DOCKER_CONTAINER", False):
