@@ -1,17 +1,22 @@
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import router
 
-app = FastAPI(title="Loonie API", swagger_ui_parameters={"persistAuthorization": True})
-
-
-app.add_middleware(
+middleware = [
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    {
+        "allow_origins": ["*"],
+        "allow_credentials": True,
+        "allow_methods": ["*"],
+        "allow_headers": ["*"],
+    },
+]
+
+app = FastAPI(
+    title="Loonie API",
+    swagger_ui_parameters={"persistAuthorization": True},
+    middleware=middleware,
 )
 
 app.include_router(router)
