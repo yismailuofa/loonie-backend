@@ -136,7 +136,7 @@ class MarketplaceIntegration(Integration):
             ).click()
 
             logger.debug("Waiting for listing to be published")
-            driver.save_screenshot("facebook.png")
+
             longWait.until(
                 lambda d: d.current_url
                 == "https://www.facebook.com/marketplace/you/selling"

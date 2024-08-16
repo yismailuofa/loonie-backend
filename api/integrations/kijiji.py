@@ -21,8 +21,6 @@ class KijijiIntegration(Integration):
 
             driver.get("https://www.kijiji.ca/p-select-category.html")
 
-            driver.save_screenshot("kijiji.png")
-
             wait.until(
                 EC.any_of(
                     EC.presence_of_element_located((By.ID, "username")),
