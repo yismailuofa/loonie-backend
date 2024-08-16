@@ -24,15 +24,15 @@ class MarketplaceIntegration(Integration):
             driver.get("https://www.facebook.com/marketplace")
 
             if not driver.find_elements(By.NAME, "email"):
-                logger.debug("Already logged in to Facebook")
+                logger.debug("[FB] Already logged in to Facebook")
             else:
                 if not (user := os.getenv("MARKETPLACE_USERNAME")) or not (
                     password := os.getenv("MARKETPLACE_PASSWORD")
                 ):
-                    logger.debug("Missing Facebook credentials")
+                    logger.debug("[FB] Missing Facebook credentials")
                     raise Exception("Missing Facebook credentials")
 
-                logger.debug("Logging in to Facebook")
+                logger.debug("[FB] Logging in to Facebook")
                 wait.until(lambda d: d.find_element(By.NAME, "email")).send_keys(user)
                 wait.until(lambda d: d.find_element(By.NAME, "pass")).send_keys(
                     password, Keys.RETURN
@@ -44,7 +44,7 @@ class MarketplaceIntegration(Integration):
                     )
                 )
 
-            logger.debug("Navigating to create listing page")
+            logger.debug("[FB] Navigating to create listing page")
             driver.get("https://www.facebook.com/marketplace/create/item")
 
             # sometimes it doesn't redirect to the create listing page so we try again
@@ -53,7 +53,7 @@ class MarketplaceIntegration(Integration):
                 == "https://www.facebook.com/marketplace/create/item"
             ):
                 driver.get("https://www.facebook.com/marketplace/create/item")
-                logger.debug("Retrying to navigate to create listing page")
+                logger.debug("[FB] Retrying to navigate to create listing page")
                 try:
                     wait.until(
                         lambda d: d.current_url
@@ -66,7 +66,7 @@ class MarketplaceIntegration(Integration):
                 lambda d: d.find_element(By.XPATH, '//label[@aria-label="Title"]')
             )
 
-            logger.debug("Filling out listing form")
+            logger.debug("[FB] Filling out listing form")
             if request.images:
                 imageInput = driver.find_element(
                     By.XPATH, "//input[@accept='image/*,image/heif,image/heic']"
@@ -129,26 +129,26 @@ class MarketplaceIntegration(Integration):
                 lambda d: d.find_element(By.XPATH, f"//span[text()='Door dropoff']")
             ).click()
 
-            logger.debug("Publishing listing")
+            logger.debug("[FB] Publishing listing")
             driver.find_element(By.XPATH, '//div[@aria-label="Next"]').click()
             wait.until(
                 lambda d: d.find_element(By.XPATH, '//div[@aria-label="Publish"]')
             ).click()
 
-            logger.debug("Waiting for listing to be published")
+            logger.debug("[FB] Waiting for listing to be published")
 
             longWait.until(
                 lambda d: d.current_url
                 == "https://www.facebook.com/marketplace/you/selling"
             )
 
-            logger.debug("Successfully listed on Marketplace")
+            logger.debug("[FB] Successfully listed on Marketplace")
 
             return ListingResult(
                 url="https://www.facebook.com/marketplace/you/selling", success=True
             )
         except Exception as e:
-            logger.debug("Failed to list on Marketplace: ", exc_info=e)
+            logger.debug("[FB] Failed to list on Marketplace: ", exc_info=e)
             return ListingResult(url="", success=False)
         finally:
             driver.quit()

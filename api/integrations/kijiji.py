@@ -29,26 +29,26 @@ class KijijiIntegration(Integration):
             )
 
             if not driver.find_elements(By.ID, "username"):
-                logger.debug("Already logged in to Kijiji")
+                logger.debug("[KIJIJI] Already logged in to Kijiji")
             else:
                 if not (user := os.getenv("KIJIJI_USERNAME")) or not (
                     password := os.getenv("KIJIJI_PASSWORD")
                 ):
-                    logger.debug("Missing Facebook credentials")
+                    logger.debug("[KIJIJI] Missing Facebook credentials")
                     raise Exception("Missing Facebook credentials")
 
-                logger.debug("Logging in to Kijiji")
+                logger.debug("[KIJIJI] Logging in to Kijiji")
                 wait.until(lambda d: d.find_element(By.ID, "username")).send_keys(user)
                 wait.until(lambda d: d.find_element(By.ID, "password")).send_keys(
                     password, Keys.RETURN
                 )
 
-            logger.debug("Adding title")
+            logger.debug("[KIJIJI] Adding title")
             wait.until(lambda d: d.find_element(By.NAME, "AdTitleForm")).send_keys(
                 request.title, Keys.RETURN
             )
 
-            logger.debug("Selecting category")
+            logger.debug("[KIJIJI] Selecting category")
             wait.until(
                 lambda d: d.find_element(By.XPATH, '//span[text()="Buy & Sell"]')
             ).click()
@@ -67,7 +67,7 @@ class KijijiIntegration(Integration):
 
             wait.until(lambda d: d.find_element(By.ID, "OFFER1"))
 
-            logger.debug("Adding rest of form")
+            logger.debug("[KIJIJI] Adding rest of form")
 
             if request.images:
                 imageInput = driver.find_element(
@@ -139,7 +139,7 @@ class KijijiIntegration(Integration):
                 request.price
             )
 
-            logger.debug("Posting ad")
+            logger.debug("[KIJIJI] Posting ad")
             wait.until(
                 lambda d: d.find_element(By.XPATH, '//button[text()="Post Your Ad"]')
             ).click()
@@ -147,14 +147,14 @@ class KijijiIntegration(Integration):
             longWait = WebDriverWait(driver, 60)
             longWait.until(EC.title_contains(request.title))
 
-            logger.debug("Successfully listed on Kijiji")
+            logger.debug("[KIJIJI] Successfully listed on Kijiji")
 
             return ListingResult(
                 url="https://www.kijiji.ca/m-my-ads/active/", success=True
             )
 
         except Exception as e:
-            logger.debug("Failed to list on Kijiji: ", exc_info=e)
+            logger.debug("[KIJIJI] Failed to list on Kijiji: ", exc_info=e)
             return ListingResult(url="", success=False)
         finally:
             driver.quit()
