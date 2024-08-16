@@ -1,16 +1,17 @@
 from fastapi import FastAPI
+from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import router
 
 middleware = [
-    CORSMiddleware,
-    {
-        "allow_origins": ["*"],
-        "allow_credentials": True,
-        "allow_methods": ["*"],
-        "allow_headers": ["*"],
-    },
+    Middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 ]
 
 app = FastAPI(
