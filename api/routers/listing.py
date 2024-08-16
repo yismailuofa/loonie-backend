@@ -10,6 +10,7 @@ from pillow_heif import register_heif_opener
 from api.integrations.kijiji import KijijiIntegration
 from api.integrations.marketplace import MarketplaceIntegration
 from api.interfaces import Condition, ListingRequest, ListingResults
+from api.logger import logger
 
 register_heif_opener()
 
@@ -56,13 +57,15 @@ async def createListing(
 
     try:
         if os.getenv("IN_DOCKER_CONTAINER", False):
+            logger.debug("Multithreading in Docker container")
+
             with ThreadPoolExecutor(max_workers=2) as executor:
                 res = executor.map(
                     lambda i: i.list(lr),
-                    [KijijiIntegration(), MarketplaceIntegration()],
+                    [MarketplaceIntegration(), KijijiIntegration()],
                 )
 
-                k, m = res
+                m, k = res
         else:
             k = KijijiIntegration().list(lr)
             m = MarketplaceIntegration().list(lr)

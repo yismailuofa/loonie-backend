@@ -17,7 +17,9 @@ class Integration(ABC):
     def list(self, request: ListingRequest) -> ListingResult:
         raise NotImplementedError
 
-    def getDriver(self, exec_name="selenium") -> webdriver.Chrome | webdriver.Remote:
+    def getDriver(
+        self, exec_name="selenium:4444"
+    ) -> webdriver.Chrome | webdriver.Remote:
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-notifications")
         options.add_argument("--no-sandbox")
@@ -29,7 +31,7 @@ class Integration(ABC):
         if os.getenv("IN_DOCKER_CONTAINER", False):
             options.add_argument("--user-data-dir=/home/seluser/selenium")
             driver = webdriver.Remote(
-                options=options, command_executor=f"http://{exec_name}:4444/wd/hub"
+                options=options, command_executor=f"http://{exec_name}/wd/hub"
             )
         else:
             options.add_argument("--user-data-dir=selenium")

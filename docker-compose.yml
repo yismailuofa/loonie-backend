@@ -3,19 +3,24 @@ services:
   selenium-fb:
     image: selenium/standalone-chromium:latest
     ports:
-      - 4444:4444
-      - 7900:7900
+      - 4445:4444
+      - 7901:7900
     restart: always
     shm_size: 2gb
     privileged: true
+    environment:
+      - OTEL_SDK_DISABLED=true
+
   selenium-kj:
     image: selenium/standalone-chromium:latest
     ports:
-      - 4444:4444
-      - 7900:7900
+      - 4446:4444
+      - 7902:7900
     restart: always
     shm_size: 2gb
     privileged: true
+    environment:
+      - OTEL_SDK_DISABLED=true
 
   api:
     build:
@@ -27,5 +32,6 @@ services:
       - .env
     restart: always
     depends_on:
-      - selenium
+      - selenium-fb
+      - selenium-kj
 

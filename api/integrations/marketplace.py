@@ -16,7 +16,7 @@ from api.logger import logger
 
 class MarketplaceIntegration(Integration):
     def list(self, request) -> ListingResult:
-        driver = self.getDriver(exec_name="selenium-fb")
+        driver = self.getDriver(exec_name="selenium-fb:4444")
         try:
             wait = WebDriverWait(driver, self.DEFAULT_TIMEOUT)
             longWait = WebDriverWait(driver, 60)

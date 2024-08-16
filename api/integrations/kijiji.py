@@ -15,7 +15,7 @@ load_dotenv()
 
 class KijijiIntegration(Integration):
     def list(self, request) -> ListingResult:
-        driver = self.getDriver("selenium-kj")
+        driver = self.getDriver("selenium-kj:4444")
         try:
             wait = WebDriverWait(driver, self.DEFAULT_TIMEOUT)
 
