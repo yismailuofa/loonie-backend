@@ -11,7 +11,7 @@ load_dotenv()
 
 class Integration(ABC):
     def __init__(self):
-        self.DEFAULT_TIMEOUT = 10
+        self.DEFAULT_TIMEOUT = 25
 
     @abstractmethod
     def list(self, request: ListingRequest) -> ListingResult:
