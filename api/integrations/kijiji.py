@@ -15,11 +15,13 @@ load_dotenv()
 
 class KijijiIntegration(Integration):
     def list(self, request) -> ListingResult:
-        driver = self.getDriver()
+        driver = self.getDriver("selenium-kj")
         try:
             wait = WebDriverWait(driver, self.DEFAULT_TIMEOUT)
 
             driver.get("https://www.kijiji.ca/p-select-category.html")
+
+            driver.save_screenshot("kijiji.png")
 
             wait.until(
                 EC.any_of(
@@ -147,13 +149,11 @@ class KijijiIntegration(Integration):
             longWait = WebDriverWait(driver, 60)
             longWait.until(EC.title_contains(request.title))
 
-            url = driver.current_url
+            logger.debug("Successfully listed on Kijiji")
 
-            if not url:
-                logger.debug("Failed to get listing URL")
-                raise Exception("Failed to get listing URL")
-
-            return ListingResult(url=url, success=True)
+            return ListingResult(
+                url="https://www.kijiji.ca/m-my-ads/active/", success=True
+            )
 
         except Exception as e:
             logger.debug("Failed to list on Kijiji: ", exc_info=e)

@@ -1,6 +1,8 @@
 import os
+from concurrent.futures import ThreadPoolExecutor
 from typing import Annotated
 
+from dotenv import load_dotenv
 from fastapi import APIRouter, File, Form, UploadFile
 from PIL import Image
 from pillow_heif import register_heif_opener
@@ -10,6 +12,8 @@ from api.integrations.marketplace import MarketplaceIntegration
 from api.interfaces import Condition, ListingRequest, ListingResults
 
 register_heif_opener()
+
+load_dotenv()
 
 router = APIRouter()
 
@@ -51,8 +55,17 @@ async def createListing(
     )
 
     try:
-        k = KijijiIntegration().list(lr)
-        m = MarketplaceIntegration().list(lr)
+        if os.getenv("IN_DOCKER_CONTAINER", False):
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                res = executor.map(
+                    lambda i: i.list(lr),
+                    [KijijiIntegration(), MarketplaceIntegration()],
+                )
+
+                k, m = res
+        else:
+            k = KijijiIntegration().list(lr)
+            m = MarketplaceIntegration().list(lr)
 
         return ListingResults(
             kijiji=k,

@@ -16,7 +16,7 @@ from api.logger import logger
 
 class MarketplaceIntegration(Integration):
     def list(self, request) -> ListingResult:
-        driver = self.getDriver()
+        driver = self.getDriver(exec_name="selenium-fb")
         try:
             wait = WebDriverWait(driver, self.DEFAULT_TIMEOUT)
             longWait = WebDriverWait(driver, 60)
@@ -136,27 +136,17 @@ class MarketplaceIntegration(Integration):
             ).click()
 
             logger.debug("Waiting for listing to be published")
+            driver.save_screenshot("facebook.png")
             longWait.until(
                 lambda d: d.current_url
                 == "https://www.facebook.com/marketplace/you/selling"
             )
 
-            wait.until(
-                lambda d: d.find_element(By.XPATH, f"//span[text()='{request.title}']")
+            logger.debug("Successfully listed on Marketplace")
+
+            return ListingResult(
+                url="https://www.facebook.com/marketplace/you/selling", success=True
             )
-            driver.find_element(By.XPATH, f"//span[text()='{request.title}']").click()
-
-            url = wait.until(
-                lambda d: d.find_element(
-                    By.XPATH, '//div[@aria-label="Your Listing"]//a'
-                )
-            ).get_attribute("href")
-
-            if not url:
-                logger.debug("Failed to get listing URL")
-                raise Exception("Failed to get listing URL")
-
-            return ListingResult(url=url, success=True)
         except Exception as e:
             logger.debug("Failed to list on Marketplace: ", exc_info=e)
             return ListingResult(url="", success=False)

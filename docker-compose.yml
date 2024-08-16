@@ -1,6 +1,6 @@
 version: '3'
 services:
-  selenium:
+  selenium-fb:
     image: selenium/standalone-chromium:latest
     ports:
       - 4444:4444
@@ -8,8 +8,14 @@ services:
     restart: always
     shm_size: 2gb
     privileged: true
-    environment:
-      - SE_NODE_MAX_SESSIONS=2
+  selenium-kj:
+    image: selenium/standalone-chromium:latest
+    ports:
+      - 4444:4444
+      - 7900:7900
+    restart: always
+    shm_size: 2gb
+    privileged: true
 
   api:
     build:
