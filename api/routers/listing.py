@@ -19,7 +19,7 @@ load_dotenv()
 router = APIRouter()
 
 
-@router.post("/", name="Create a listing")
+@router.post("", name="Create a listing")
 async def createListing(
     title: Annotated[str, Form()],
     description: Annotated[str, Form()],
