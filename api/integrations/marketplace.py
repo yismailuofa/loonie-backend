@@ -119,16 +119,6 @@ class MarketplaceIntegration(Integration):
                     By.XPATH, '//label[@aria-label="Product tags"]//textarea'
                 ).send_keys(joinedTags)
 
-            wait.until(
-                lambda d: d.find_element(By.XPATH, f"//span[text()='Public meetup']")
-            ).click()
-            wait.until(
-                lambda d: d.find_element(By.XPATH, f"//span[text()='Door pickup']")
-            ).click()
-            wait.until(
-                lambda d: d.find_element(By.XPATH, f"//span[text()='Door dropoff']")
-            ).click()
-
             logger.debug("[FB] Publishing listing")
             driver.find_element(By.XPATH, '//div[@aria-label="Next"]').click()
             wait.until(

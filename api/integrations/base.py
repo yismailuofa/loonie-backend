@@ -26,7 +26,7 @@ class Integration(ABC):
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-extensions")
         options.add_argument("--window-size=1920,1080")
-        options.add_argument("--headless")
+        # options.add_argument("--headless")
 
         if os.getenv("IN_DOCKER_CONTAINER", False):
             options.add_argument("--user-data-dir=/home/seluser/selenium")
