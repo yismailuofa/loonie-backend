@@ -38,3 +38,12 @@ class Integration(ABC):
             driver = webdriver.Chrome(options=options)
 
         return driver
+
+    def listWithRetries(self, request: ListingRequest, retries=3) -> ListingResult:
+        for i in range(retries):
+            try:
+                print(f"Attempt {i+1}")
+                return self.list(request)
+            except Exception as e:
+                print(e)
+        raise Exception("Failed to list after 3 retries")

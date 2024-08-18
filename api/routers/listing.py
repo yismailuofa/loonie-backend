@@ -4,7 +4,7 @@ from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, File, Form, UploadFile
-from PIL import Image
+from PIL import Image, ImageOps
 from pillow_heif import register_heif_opener
 
 from api.integrations.kijiji import KijijiIntegration
@@ -38,11 +38,9 @@ async def createListing(
         if not image.size:
             continue
 
-        with open(f"temp/{image.filename}", "wb") as f:
-            img = Image.open(image.file)
-            img = img.convert("RGB")
-            img.save(f"temp/{image.filename}", "JPEG")
-
+        img = Image.open(image.file)
+        img = ImageOps.exif_transpose(img)
+        img.save(f"temp/{image.filename}")  # type: ignore
         imagePaths.append(os.path.abspath(f"temp/{image.filename}"))
 
     lr = ListingRequest(
@@ -60,12 +58,11 @@ async def createListing(
             logger.debug("Multithreading in Docker container")
 
             with ThreadPoolExecutor(max_workers=2) as executor:
-                res = executor.map(
-                    lambda i: i.list(lr),
-                    [MarketplaceIntegration(), KijijiIntegration()],
-                )
+                m = executor.submit(MarketplaceIntegration().listWithRetries, lr)
+                k = executor.submit(KijijiIntegration().listWithRetries, lr)
 
-                m, k = res
+                m = m.result()
+                k = k.result()
         else:
             k = KijijiIntegration().list(lr)
             m = MarketplaceIntegration().list(lr)
